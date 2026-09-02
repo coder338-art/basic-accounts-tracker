@@ -15,8 +15,7 @@ def run_monitor(config: dict):
     mention = config.get("DISCORD_MENTION_ID", "<@id>")
     interval = int(config.get("CHECK_INTERVAL", 60))
     accounts = config.get("ACCOUNTS", [])
-    stage1 = int(config.get("VIRAL_STAGE_1_VIEWS", 5000))
-    stage2 = int(config.get("VIRAL_STAGE_2_VIEWS", 10000))
+    view_threshold = int(config.get("VIEW_THRESHOLD", 200))
 
     conn = init_db()
     cache = load_cache()
@@ -54,23 +53,15 @@ def run_monitor(config: dict):
                     upsert_video(conn, username, video)
                 insert_snapshot(conn, username, current)
 
-                # Stage-based viral alerts (only when thresholds crossed)
+                # Single threshold alert (fires once when a video crosses it)
                 prev_views = int(prev.get("views", 0))
                 cur_views = current["views"]
-                if prev_views < stage1 <= cur_views:
+                if prev_views < view_threshold <= cur_views:
                     send_discord_embed(
                         webhook, mention,
-                        "🔥 Stage 1: Rising",
+                        "🔥 Video is picking up",
                         f"@{username} video reached {format_number(cur_views)} views",
                         0xFFA500,
-                        [{"name": "Views", "value": format_number(cur_views), "inline": True}],
-                    )
-                if prev_views < stage2 <= cur_views:
-                    send_discord_embed(
-                        webhook, mention,
-                        "🔥 Stage 2: Potential VIRAL",
-                        f"@{username} video reached {format_number(cur_views)} views",
-                        0xFFD700,
                         [
                             {"name": "Views", "value": format_number(cur_views), "inline": True},
                             {"name": "URL", "value": current.get("video_url", ""), "inline": False},
