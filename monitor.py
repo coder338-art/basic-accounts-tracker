@@ -54,19 +54,6 @@ def run_monitor(config: dict):
                     upsert_video(conn, username, video)
                 insert_snapshot(conn, username, current)
 
-                # New post detection
-                if current["video_id"] and prev.get("video_id") != current["video_id"]:
-                    send_discord_embed(
-                        webhook, mention,
-                        "🚨 New Video",
-                        f"@{username}",
-                        0xFF0000,
-                        [
-                            {"name": "Description", "value": current.get("video_desc", ""), "inline": False},
-                            {"name": "Watch", "value": current.get("video_url", ""), "inline": False},
-                        ],
-                    )
-
                 # Stage-based viral alerts (only when thresholds crossed)
                 prev_views = int(prev.get("views", 0))
                 cur_views = current["views"]
