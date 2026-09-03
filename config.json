@@ -2,7 +2,7 @@
     "TIKWM_API_KEY": "2186f59954e88547330cd0af65eb5e0e",
     "DISCORD_WEBHOOK": "https://discord.com/api/webhooks/1540026165958549540/v7SAxsiMNujNHuEUIHJenWCtKBKZbsGZ3GGDd42Y-RZnMB4bHyxmrVUAipFKWIpnqQsd",
     "DISCORD_MENTION_ID": "<@627335883158192128>",
-    "CHECK_INTERVAL": 60,
+    "CHECK_INTERVAL": 900,
     "ACCOUNTS": [
         "sophwalkerr7",
         "sophmitchell.jpg",
