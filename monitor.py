@@ -15,8 +15,8 @@ def run_monitor(config: dict):
     mention = config.get("DISCORD_MENTION_ID", "<@id>")
     interval = int(config.get("CHECK_INTERVAL", 900))
     accounts = config.get("ACCOUNTS", [])
-    stage1 = int(config.get("VIRAL_STAGE_1_VIEWS", 2000))
-    stage2 = int(config.get("VIRAL_STAGE_2_VIEWS", 8000))
+    stage1 = int(config.get("VIRAL_STAGE_1_VIEWS", 5000))
+    stage2 = int(config.get("VIRAL_STAGE_2_VIEWS", 10000))
 
     conn = init_db()
     cache = load_cache()
@@ -53,6 +53,19 @@ def run_monitor(config: dict):
                 if video:
                     upsert_video(conn, username, video)
                 insert_snapshot(conn, username, current)
+
+                # New post detection
+                if current["video_id"] and prev.get("video_id") != current["video_id"]:
+                    send_discord_embed(
+                        webhook, mention,
+                        "🚨 New Video",
+                        f"@{username}",
+                        0xFF0000,
+                        [
+                            {"name": "Description", "value": current.get("video_desc", ""), "inline": False},
+                            {"name": "Watch", "value": current.get("video_url", ""), "inline": False},
+                        ],
+                    )
 
                 # Stage-based viral alerts (only when thresholds crossed)
                 prev_views = int(prev.get("views", 0))
