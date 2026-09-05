@@ -13,9 +13,10 @@ def run_monitor(config: dict):
     api_key = config.get("TIKWM_API_KEY", "")
     webhook = config.get("DISCORD_WEBHOOK", "")
     mention = config.get("DISCORD_MENTION_ID", "<@id>")
-    interval = int(config.get("CHECK_INTERVAL", 60))
+    interval = int(config.get("CHECK_INTERVAL", 900))
     accounts = config.get("ACCOUNTS", [])
-    view_threshold = int(config.get("VIEW_THRESHOLD", 200))
+    stage1 = int(config.get("VIRAL_STAGE_1_VIEWS", 2000))
+    stage2 = int(config.get("VIRAL_STAGE_2_VIEWS", 8000))
 
     conn = init_db()
     cache = load_cache()
@@ -53,15 +54,23 @@ def run_monitor(config: dict):
                     upsert_video(conn, username, video)
                 insert_snapshot(conn, username, current)
 
-                # Single threshold alert (fires once when a video crosses it)
+                # Stage-based viral alerts (only when thresholds crossed)
                 prev_views = int(prev.get("views", 0))
                 cur_views = current["views"]
-                if prev_views < view_threshold <= cur_views:
+                if prev_views < stage1 <= cur_views:
                     send_discord_embed(
                         webhook, mention,
-                        "🔥 Video is picking up",
+                        "🔥 Stage 1: Rising",
                         f"@{username} video reached {format_number(cur_views)} views",
                         0xFFA500,
+                        [{"name": "Views", "value": format_number(cur_views), "inline": True}],
+                    )
+                if prev_views < stage2 <= cur_views:
+                    send_discord_embed(
+                        webhook, mention,
+                        "🔥 Stage 2: Potential VIRAL",
+                        f"@{username} video reached {format_number(cur_views)} views",
+                        0xFFD700,
                         [
                             {"name": "Views", "value": format_number(cur_views), "inline": True},
                             {"name": "URL", "value": current.get("video_url", ""), "inline": False},
