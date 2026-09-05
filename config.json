@@ -10,5 +10,6 @@
         "gracewilson.jpg",
         "hannahreed_2"
     ],
-    "VIEW_THRESHOLD": 200
+    "VIRAL_STAGE_1_VIEWS": 2000,
+"VIRAL_STAGE_2_VIEWS": 8000
 }
